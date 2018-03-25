@@ -92,9 +92,9 @@ filePath, modelDirectory, isLC, isHelp = get_args()
 while (isHelp):
     if isHelp:
         print('''Введите:
-        (Опционально) --input-dir <Путь до файла, на котором проходит обучение>, 
-            иначе ввод осуществляется через консоль. Если ввод из консосли, окан-
-            чивайте свой текст: ////
+        (Опционально) --input-dir <Путь до файла, на которо проходит обучение>,
+          иначе ввод осуществляется через консоль. Если ввод из консосли, окан-
+          чивайте свой текст: ////
          --model-dir <Папка для сохранения модели>
         (Опционально) --lc, если требуется привести слова к нижнему регистру
         (Опционально) --help, для описания команд''')
@@ -123,7 +123,8 @@ for (t0, t1), freq in pairFreq.items():
 
 
 # Сохранение нашей модели в файл model.txt в указанной пользователем папке
-modelFile = open('{}\\model.txt'.format(modelDirectory), 'w', encoding=encodeType)
+modelFile = open('{}\\model.txt'.format(modelDirectory), 'w',
+                 encoding=encodeType)
 
 for key, lst in model.items():
     modelFile.write(key)
