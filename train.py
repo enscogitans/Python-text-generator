@@ -42,10 +42,6 @@ def line_generator(filename, file_path):
             yield str(bytes(line, encodeType).decode(encodeType))
     else:
         while True:
-            '''try:
-                line = input()
-            except EOFError:
-                return'''
             line = input()
             if line == '////':
                 return
