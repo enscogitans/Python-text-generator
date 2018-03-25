@@ -45,17 +45,18 @@ modelDirectory, firstWord, length, outputFile, isHelp = get_args()
 while isHelp:
     if isHelp:
         print('''Введите:
-                 --model <Папка для загрузки модели>
-                (Опционально) --output <Путь до файла, в который будет сохранён текст>, 
-                    иначе вывод в консоль
-                (Опционально) --seed <Слово>, задаёт первое слово текста
-                (Опционально) --length <Число>, задаёт длину текста, иначе 200
-                (Опционально) --help, для описания команд''')
+            --model <Папка для загрузки модели>
+            (Опционально) --output <Путь до файла, куда будет сохранён текст>,
+                иначе вывод в консоль
+            (Опционально) --seed <Слово>, задаёт первое слово текста
+            (Опционально) --length <Число>, задаёт длину текста, иначе 200
+            (Опционально) --help, для описания команд''')
     modelDirectory, firstWord, length, outputFile, isHelp = get_args()
 
 
 # Считывание данных из нашей модели
-modelFile = open('{}\\model.txt'.format(modelDirectory), 'r', encoding=encodeType)
+modelFile = open('{}\\model.txt'.format(modelDirectory),
+                 'r', encoding=encodeType)
 
 modelWords = defaultdict(list)
 modelProbabilities = defaultdict(list)
@@ -87,7 +88,8 @@ if firstWord != '' and firstWord not in modelWords.keys():
 
 
 for i in range(length - 1):     # Генерация последующих слов
-    nextWord = np.random.choice(modelWords[prevWord], p=modelProbabilities[prevWord])
+    nextWord = np.random.choice(modelWords[prevWord],
+                                p=modelProbabilities[prevWord])
     isSpace = False     # Ставить ли пробел перед очередным словом
 
     if re.fullmatch(r'[?!.]+', nextWord):
