@@ -81,7 +81,10 @@ def count_words_and_pairs(bigrams):
         pair_freq[(t0, t1)] += 1
         last_symbol = t1
 
-    pair_freq[(last_symbol, '&')] += 1
+    if re.fullmatch(r'[?!.]+', last_symbol):
+        pair_freq[('&', '&')] += 1
+    else:
+        pair_freq[(last_symbol, '&')] += 1
 
     return word_freq, pair_freq
 
