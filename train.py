@@ -1,45 +1,39 @@
 import re
+import argparse
 from fractions import Fraction
 from collections import defaultdict
 
-# Наш алфавит
+# Наш алфавит и используемая кодировка
 alphabet = re.compile(u'[ёЁа-яА-Я0-9]+[-]?[ёЁа-яА-Я0-9]+|[.,?!;:]+')
-# Наша кодировка
-encodeType = 'utf-8'
+encode_type = 'utf-8'
 
 
-# Возвращает пользовательские аргументы
-def get_args():
-    line = input().split()
-
-    input_path = str()
-    model_dir = str()
-    is_lc = False
-    is_help = False
-
-    i = 0
-    while i < len(line):
-        if line[i] == '--input-dir':
-            input_path = line[i + 1]
-            i += 1
-        elif line[i] == '--model-dir':
-            model_dir = line[i + 1]
-            i += 1
-        elif line[i] == '--lc':
-            is_lc = True
-        elif line[i] == '--help':
-            is_help = True
-        i += 1
-
-    return input_path, model_dir, is_lc, is_help
+# Создание парсера
+def create_parser():
+    parser = argparse.ArgumentParser(
+        description='''Это программа для создания модели введённого текста.
+        Созданная модель в дальнейшем используется для генерации псевдотекста
+        программой generate.py'''
+    )
+    parser.add_argument('-id', '--input-dir',
+                        help='''Директория, в которой лежит коллекция документов.
+                        Если не указано, ввод текта осуществляется из консоли.
+                        В данном случае необходимо закончить ввод данных вводом
+                        строки: '////' '''
+                        )
+    parser.add_argument('-m', '--model', required=True,
+                        help='Путь к файлу, в который сохраняется модель')
+    parser.add_argument('-lc', '--lowercase', type=bool, default=False,
+                        help='Приводить тексты к lowercase')
+    return parser
 
 
 # Построчно генерирует строки из данного файла (stdin)
-def line_generator(filename, file_path):
-    if file_path != '':
-        file = open(filename, 'r', encoding=encodeType)
+def line_generator(file_path):
+    if file_path is not None:
+        file = open(file_path, 'r', encoding=encode_type)
         for line in file:
-            yield str(bytes(line, encodeType).decode(encodeType))
+            yield str(bytes(line, encode_type).decode(encode_type))
     else:
         while True:
             line = input()
@@ -85,54 +79,45 @@ def count_words_and_pairs(bigrams):
         pair_freq[('&', '&')] += 1
     else:
         pair_freq[(last_symbol, '&')] += 1
-
     return word_freq, pair_freq
-
-
-# Ввод аргументов
-print('--help, для описания команд')
-filePath, modelDirectory, isLC, isHelp = get_args()
-while (isHelp):
-    if isHelp:
-        print('''Введите:
-        (Опционально) --input-dir <Путь до файла, на которо проходит обучение>,
-          иначе ввод осуществляется через консоль. Если ввод из консосли, окан-
-          чивайте свой текст: ////
-         --model-dir <Папка для сохранения модели>
-        (Опционально) --lc, если требуется привести слова к нижнему регистру
-        (Опционально) --help, для описания команд''')
-
-    filePath, modelDirectory, isLC, isHelp = get_args()
-
-
-# Инициализация генератора биграмм
-lines = line_generator(filePath, filePath)
-tokens = token_generator(lines, isLC)
-bigrams = bigram_generator(tokens)
-
-
-# Подсчёт количества слов и пар слов соответственно
-wordFreq, pairFreq = count_words_and_pairs(bigrams)
 
 
 # Инициализация нашей модели. По ключу хранится лист слов,
 # которые могут идти после него с указаним вероятности (в виде рац. дроби)
-model = dict()
-for (t0, t1), freq in pairFreq.items():
-    if t0 in model:
-        model[t0].append((t1, Fraction(freq, wordFreq[t0])))
-    else:
-        model[t0] = [(t1, Fraction(freq, wordFreq[t0]))]
+def initialise_model(word_freq, pair_freq):
+    model = dict()
+    for (t0, t1), freq in pairFreq.items():
+        if t0 in model:
+            model[t0].append((t1, Fraction(freq, wordFreq[t0])))
+        else:
+            model[t0] = [(t1, Fraction(freq, wordFreq[t0]))]
+    return model
 
 
-# Сохранение нашей модели в файл model.txt в указанной пользователем папке
-modelFile = open('{}\\model.txt'.format(modelDirectory), 'w',
-                 encoding=encodeType)
+# Сохранение модели в файл model.txt в указанной папке
+def save_model(model, model_path):
+    model_file = open('{}\\model.txt'.format(model_path), 'w',
+                      encoding=encode_type)
+    for key, lst in model.items():
+        model_file.write(key)
+        for (word, freq) in lst:
+            model_file.write(' {} {}'.format(word, freq))
+        model_file.write('\n')
+    model_file.close()
 
-for key, lst in model.items():
-    modelFile.write(key)
-    for (word, freq) in lst:
-        modelFile.write(' {} {}'.format(word, freq))
-    modelFile.write('\n')
 
-modelFile.close()
+# Считывание аргументов
+parser = create_parser()
+args = parser.parse_args()
+
+# Инициализация генератора биграмм
+lines = line_generator(args.input_dir)
+tokens = token_generator(lines, args.lowercase)
+bigrams = bigram_generator(tokens)
+
+# Подсчёт количества слов и пар слов соответственно
+word_freq, pair_freq = count_words_and_pairs(bigrams)
+
+# Инициализация и сохранение нашей модели
+model = initialise_model(word_freq, pair_freq)
+save_model(model, args.model)
