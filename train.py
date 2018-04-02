@@ -86,11 +86,11 @@ def count_words_and_pairs(bigrams):
 # которые могут идти после него с указаним вероятности (в виде рац. дроби)
 def initialise_model(word_freq, pair_freq):
     model = dict()
-    for (t0, t1), freq in pairFreq.items():
+    for (t0, t1), freq in pair_freq.items():
         if t0 in model:
-            model[t0].append((t1, Fraction(freq, wordFreq[t0])))
+            model[t0].append((t1, Fraction(freq, word_freq[t0])))
         else:
-            model[t0] = [(t1, Fraction(freq, wordFreq[t0]))]
+            model[t0] = [(t1, Fraction(freq, word_freq[t0]))]
     return model
 
 
