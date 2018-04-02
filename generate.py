@@ -11,10 +11,10 @@ encode_type = 'utf-8'  # Наша кодировка
 # Позволяет использовать те же основные методы, что и
 # открытый через open файл, но только с выводом в консоль
 class ConsoleOutAsFile:
-    def write(self, line):
+    def write(line):
         print(line, sep='', end='')
 
-    def close(self):
+    def close():
         return
 
 
