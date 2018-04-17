@@ -31,9 +31,9 @@ def create_parser():
 # Построчно генерирует строки из данного файла (stdin)
 def line_generator(file_path):
     if file_path is not None:
-        file = open(file_path, 'r', encoding=encode_type)
-        for line in file:
-            yield str(bytes(line, encode_type).decode(encode_type))
+        with open(file_path, 'r', encoding=encode_type) as file:
+            for line in file:
+                yield str(bytes(line, encode_type).decode(encode_type))
     else:
         while True:
             line = input()
@@ -96,14 +96,13 @@ def initialise_model(word_freq, pair_freq):
 
 # Сохранение модели в файл model.txt в указанной папке
 def save_model(model, model_path):
-    model_file = open('{}\\model.txt'.format(model_path), 'w',
-                      encoding=encode_type)
-    for key, lst in model.items():
-        model_file.write(key)
-        for (word, freq) in lst:
-            model_file.write(' {} {}'.format(word, freq))
-        model_file.write('\n')
-    model_file.close()
+    with open('{}\\model.txt'.format(model_path), 'w',
+              encoding=encode_type) as model_file:
+        for key, lst in model.items():
+            model_file.write(key)
+            for (word, freq) in lst:
+                model_file.write(' {} {}'.format(word, freq))
+            model_file.write('\n')
 
 
 # Считывание аргументов
