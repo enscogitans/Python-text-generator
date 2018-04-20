@@ -1,7 +1,6 @@
 import re
 import argparse
 import numpy as np
-import random
 from collections import defaultdict
 from fractions import Fraction
 import sys
@@ -16,7 +15,7 @@ encode_type = 'utf-8'  # Наша кодировка
 # filename)
 @contextlib.contextmanager
 def my_open_output(filename=None):
-    if filename:
+    if filename is not None:
         fh = open(filename, 'w')
     else:
         fh = sys.stdout
@@ -64,7 +63,7 @@ def read_model_from_file(model_path):
                 model_words[key].append(new_line[i])
                 model_probabilities[key].append(Fraction(new_line[i + 1]))
 
-        return model_words, model_probabilities
+    return model_words, model_probabilities
 
 
 # Генерация текста и запись его в файл (в stdout)
@@ -73,9 +72,10 @@ def generate_and_print_text(model_words, model_probabilities, seed,
     # Открытие файла (stdout)
     with my_open_output(output) as result_file:
         # Выбор первого слова, и его вывод
-        prev_word = seed
         if seed is None:
             prev_word = np.random.choice(model_words['&'])
+        else:
+            prev_word = seed
         result_file.write(prev_word)
 
         # Проверка этого слова на наличие в нашей модели
